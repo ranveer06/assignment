@@ -1,9 +1,14 @@
 // ignore_for_file: use_key_in_widget_constructors
 
+import 'package:bbtry/LoginBloc.dart';
+import 'package:bbtry/LoginState.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'HomePage.dart';
+import 'LoginEvent.dart';
+import 'SuccessDialog.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -38,11 +43,24 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text('My First App'),
-          centerTitle: true,
-        ),
+    return BlocListener<LoginBloc, LoginState>(
+      listener: (context, state) {
+        if (state.status == 'Success') {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          showDialog<void>(
+            context: context,
+            builder: (_) => const SuccessDialog(),
+          );
+        }
+        if (state.status == 'In Progress') {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(content: Text('Submitting...')),
+            );
+        }
+      },
+      child: Scaffold(
         body: Container(padding: EdgeInsets.all(10), child: Form(
           key: _formKey,
           child: Column(children: [
@@ -82,15 +100,19 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
               child: Text("Login"),
               onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomePage()),
-                  );
-                }
+                // if (_formKey.currentState!.validate()) {
+                //   Navigator.push(
+                //     context,
+                //     MaterialPageRoute(builder: (context) => HomePage()),
+                //   );
+                // }
+                //How do I create a FormSubmited Event with 2 attributes email, password and how do I emit that event
+                print("SENSING EVNE");
+                () => context.read<LoginBloc>().add(FormSubmitted(email: userId, password: password));
+                print("SENSING EVNE222");
               },
             )
           ]),
-        )));
+        ))));
   }
 }
